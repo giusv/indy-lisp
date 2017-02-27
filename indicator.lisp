@@ -2,35 +2,34 @@
   (let ((glob (symb "*" name "-TABLE*"))
 	(add (symb "ADD-" name))
 	(make (symb "MAKE-" name))
-	(clean (symb "CLEAR-" name "-TABLE")))
+	(clean (symb "CLEAR-" name "-TABLE"))
+	(arg-names (mapcar #'car args)))
     `(progn (defparameter ,glob nil)
 	    (defun ,add (,name) 
 	      (push ,name ,glob))
 	    (defun ,clean () (defparameter ,glob nil))
-	    (defun ,make ,args 
-	      (list ,@(apply #'append (mapcar #'(lambda (arg) (list (keyw arg) arg)) args))))
+	    (defun ,make ,arg-names 
+	      (list ,@(apply #'append (mapcar #'(lambda (arg) (list (keyw arg) arg)) arg-names))))
 	    (defun ,(symb "RANDOM-" name "-TABLE") (n) 
 	      (,clean) 
 	      (dotimes (i n)
-		   (,add (,make ,@(mapcar #'(lambda (*) `(random 10)) args))))))))
+		   (,add (,make ,@(mapcar #'(lambda (arg) (cadr arg)) args))))))))
 
 
-(defun select (table selector-fn)
-  (remove-if-not selector-fn table))
+;; (defun select (table selector-fn)
+;;   (remove-if-not selector-fn table))
 
-(defun make-comparison-expr (field value)
-  `(equal (getf arg ,field) ,value))
+;; (defun make-comparison-expr (field value)
+;;   `(equal (getf arg ,field) ,value))
 
-(defun make-comparisons-list (fields)
-  (loop while fields
-     collecting (make-comparison-expr (pop fields) (pop fields))))
+;; (defun make-comparisons-list (fields)
+;;   (loop while fields
+;;      collecting (make-comparison-expr (pop fields) (pop fields))))
 
-(defmacro where (&rest clauses)
-  `#'(lambda (arg) (and ,@(make-comparisons-list clauses))))
+;; (defmacro where (&rest clauses)
+;;   `#'(lambda (arg) (and ,@(make-comparisons-list clauses))))
 
-(defdb accident id date)
-(random-accident-table 10)
-(setq *accident-table* (sort *accident-table* #'< :key #'(lambda (acc) (getf acc :date))))
+;; (setq *accident-table* (sort *accident-table* #'< :key #'(lambda (acc) (getf acc :date))))
 
 (defun cluster (series duration)
   (labels ((cluster-helper (series duration acc)
@@ -51,11 +50,11 @@
 
 (defun print-cluster (list)
   (format t "~{~{~a   ~}~%~}" list))
-(defun sinistri (sogg)
-  (select *accident-table* (where :id sogg)))
+;; (defun sinistri (sogg)
+;;   (select *accident-table* (where :id sogg)))
 
 
-(print-cluster (cluster (sinistri 7) 5))
+;; (print-cluster (cluster (sinistri 7) 5))
 
 (defun restrict (table expression)
   (remove-if-not expression table))
@@ -108,7 +107,11 @@
 (defparameter row2 '(:a 1 :b 2))
 
 ;; (pprint (natjoin (list row1) (list row2)))
-(pprint (natjoin *accident-table* *accident-table*))
+;; (pprint (natjoin *accident-table* *accident-table*))
 ;; (pprint (product *accident-table* *accident-table*))
 
-(defdb soggetti id-sini id-sogg d-anno-accad d-mese-accad d-flg-coinvolto)
+(defun field-values (table field)
+  (mapcar #'(lambda (row) (getf row field))
+	  table))
+
+(load "d:/giusv/lisp/indy/db.lisp")

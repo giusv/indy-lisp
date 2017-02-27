@@ -92,3 +92,25 @@
 ;; (defmacro unless (condition &rest body)
 ;;   `(if (not ,condition) (progn ,@body)))
 
+
+(defun random-unique () 
+  (parse-integer (symbol-name (gensym ""))))
+(defun random-number (start end)
+  (+ start (random (+ 1 (- end start)))))
+(defun random-string (length)
+  (let ((consonants "bcdfghjklmnpqrstvwxyz")
+	(vowels "aeiou"))
+    (concatenate 'string 
+		 (loop for i from 0 to length
+		    collecting (if (evenp i) 
+				   (elt consonants (random 21))
+				   (elt vowels (random 5)))))))
+(defun random-boolean ()
+  (elt (list t nil) (random 2)))
+
+(defun random-date (start end)
+  (random-number start end))
+
+(defun random-from (list)
+  (let ((n (length list)))
+    (elt list (random n))))
